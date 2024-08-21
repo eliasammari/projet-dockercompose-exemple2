@@ -1,0 +1,54 @@
+version: '3'
+services:
+
+  back:
+    build:
+      context: ./back
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/back
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mysql
+
+  front:
+    build:
+      context: ./front
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:80"
+
+
+  mysql:
+    container_name: flask_mysql
+    image: mysql:5.7
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      # credentials
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: llm
+      MYSQL_USER: llm
+      MYSQL_PASSWORD: root
+
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: flask_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "5010:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: llm
+      PMA_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+
+volumes:
+  mysql-data:
+    driver: local
